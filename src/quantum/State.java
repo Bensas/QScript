@@ -48,7 +48,6 @@ public class State {
     public void applyGateToQbit(int n, Gate gate){
         if (gate.getDimension() > 2)
             throw new IllegalArgumentException("This method can only be used with single-qbit gates!");
-
         //In order to apply a gate to a single Qbit, we must apply to the whole state a new gate,
         //which will be the result of a tensor product between the original gate and a bunch of Identity Gates for the
         //Qbits what the gate should not apply to.
@@ -58,6 +57,17 @@ public class State {
         Gate[] gates = new Gate[getNumberOfQbits()];
         for (int i = 0; i < gates.length; i++) gates[i] = new ID();
         gates[n] = gate;
+        Gate resultingGate = kroeneckerProductForGates(gates);
+        resultingGate.apply(this);
+    }
+
+    public void applyGateToQbits(int firstQbit, int lastQbit, Gate gate){
+        if (gate.getDimension() != (int)Math.pow(2, lastQbit-firstQbit + 1))
+            throw new IllegalArgumentException("The number of qbits does not match the gate size!");
+
+        Gate[] gates = new Gate[getNumberOfQbits() - (lastQbit-firstQbit)];
+        for (int i = 0; i < gates.length; i++) gates[i] = new ID();
+        gates[firstQbit] = gate;
         Gate resultingGate = kroeneckerProductForGates(gates);
         resultingGate.apply(this);
     }
