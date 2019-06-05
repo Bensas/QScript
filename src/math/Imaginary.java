@@ -1,7 +1,5 @@
 package math;
 
-import java.security.InvalidParameterException;
-
 public class Imaginary {
     private double modulus;
     private double theta;
@@ -64,9 +62,6 @@ public class Imaginary {
         else
             theta = Math.atan(imaginaryPart / realPart);
         this.theta = theta;
-        //double theta = imaginaryPart > 0 ? Math.asen(imaginaryPart / realpart) : Math.PI + Math.asen(imaginaryPart / realpart);
-        //System.out.println(imaginaryPart + " - " + realPart);
-        //theta = imaginaryPart == 0 && realPart == 0? 0 : Math.asin(imaginaryPart / realPart);
         return this;
     }
 
