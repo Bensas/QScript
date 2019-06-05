@@ -1,2 +1,2 @@
 # QScript
-A Quantum computing simulation library for Java.
+A basic quantum computing circuit simulation library for Java.
