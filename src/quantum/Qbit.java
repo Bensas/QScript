@@ -14,6 +14,8 @@ public class Qbit extends State {
     }
 
     public Qbit(double probabilityOf0, double probabilityOf1){
+        if (probabilityOf0 != 1 && probabilityOf1 != 1)
+            throw new IllegalArgumentException("A Qbit must be initialized to |0> or |1>");
         components = new Imaginary[2];
         components[0] = new Imaginary(probabilityOf0, 0);
         components[1] = new Imaginary(probabilityOf1, 0);

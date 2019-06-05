@@ -1,6 +1,7 @@
 package quantum;
 
 import math.Imaginary;
+import quantum.Oracles.Oracle;
 import quantum.gates.CNOT;
 import quantum.gates.Gate;
 import quantum.gates.ID;
