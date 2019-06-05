@@ -22,6 +22,8 @@ public class Imaginary {
 
     @Override
     public String toString() {
+        if (getImaginaryPart() == 0)
+            return String.valueOf(getRealPart());
         return getRealPart() + " " + getImaginaryPart() + "i";
     }
 
