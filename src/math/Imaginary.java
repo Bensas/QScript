@@ -50,6 +50,12 @@ public class Imaginary {
         return this;
     }
 
+    public static Imaginary pow(Imaginary input, int pow){
+        double newModulus = Math.pow(input.modulus, pow);
+        double newTheta = (input.theta * pow) % Math.PI;
+        return new Imaginary(newModulus, newTheta);
+    }
+
     public Imaginary add(Imaginary n){
         double realPart = getRealPart() + n.getRealPart();
         double imaginaryPart = getImaginaryPart() + n.getImaginaryPart();
@@ -98,10 +104,27 @@ public class Imaginary {
         return this;
     }
 
+    public Imaginary divideBy(double n){
+        modulus /= n;
+        return this;
+    }
+
     public static Imaginary divide(Imaginary n1, Imaginary n2){
         double modulus = n1.getModulus() / n2.getModulus();
         double theta = n1.getTheta() - n2.getTheta();
         return new Imaginary(modulus, theta);
     }
 
+    public static Imaginary divide(Imaginary n1, double n2){
+        double modulus = n1.getModulus() / n2;
+        double theta = n1.getTheta();
+        return new Imaginary(modulus, theta);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Imaginary))
+            return false;
+        return ((Imaginary)obj).modulus == modulus && ((Imaginary)obj).theta == theta;
+    }
 }

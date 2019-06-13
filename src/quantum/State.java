@@ -16,17 +16,48 @@ public class State {
 
     protected State() {}
 
-    public void measure(){
+    public Qbit measureQbit(int n){
+        //We get a |0> or |1> value for out qbit based on it's probabilities.
+        Random rnd = new Random();
+        Qbit myQbit = measuredQbits()[n];
+        float randomFloat = rnd.nextFloat();
+        char result;
+        if (randomFloat < Imaginary.pow(myQbit.probabilityOf0(), 2).getRealPart())
+            result = '0';
+        else
+            result = '1';
+
+        //We erase all states that don't coincide with our measurement,
+        // and also collect the total probability to be used in the next part.
+        double totalProbability = 0;
+        for (int i = 0; i < components.length; i++)
+            if(fullBinaryString(i).charAt(n) != result)
+                components[i] = new Imaginary(0);
+            else
+                totalProbability += Math.pow(components[i].getModulus(), 2);
+
+        //We set new amplitudes based on relative probabilities of the remaining states.
+        for (int i = 0; i < components.length; i++)
+            components[i].divideBy(Math.sqrt(totalProbability));
+
+        return result=='0' ? new Qbit(1, 0) : new Qbit(0, 1);
+    }
+
+    public void printAmplitudes(){
         StringBuilder builder = new StringBuilder();
         builder.append("MEASURE: ");
         for (int i = 0; i < components.length; i++){
+            if (Imaginary.pow(components[i], 2).equals(new Imaginary(0)))
+                continue;
             builder.append('|');
-            for (int j = 0; j < Math.abs(Integer.toBinaryString(i).length() - getNumberOfQbits());j++)
-                builder.append('0');
-            builder.append(Integer.toBinaryString(i));
+            builder.append(fullBinaryString(i));
             builder.append(">: ");
-            builder.append(components[i].pow(2).toString());
+            //builder.append(Imaginary.pow(components[i], 2).toString());
+            builder.append(components[i].getRealPart());
             if (i != components.length-1) builder.append(" - ");
+        }
+        if (builder.charAt(builder.length()-1) == ' '){
+            builder.delete(builder.length()-3, builder.length()-1);
         }
         System.out.println(builder.toString());
     }
@@ -72,7 +103,43 @@ public class State {
         resultingGate.apply(this);
     }
 
-    public static Imaginary[] tensorize(Qbit[] input){
+    public Qbit[] measuredQbits(){
+        if ((Math.log(components.length)/Math.log(2)) % 1 != 0)
+            throw new IllegalArgumentException("The components tensor must have a number of elements equal to a power of 2!");
+
+        int numberOfQbits = (int)(Math.log(components.length)/Math.log(2));
+        Qbit[] result = new Qbit[numberOfQbits];
+        for (int i = 0; i < result.length; i++)
+            result[i] = new Qbit(0, 0);
+
+        //System.out.println("deTensorizing, components:");
+//        for (int j = 0; j < components.length; j++) {
+//            System.out.println(components[j]);
+//        }
+        for (int j = 0; j < numberOfQbits; j++){
+            boolean isAddingZero = true;
+            for (int i = 0; i < components.length; i++){
+                if (isAddingZero)
+                    result[numberOfQbits -1 - j].components[0].add(components[i]);//TODO: Should we be adding modulus? YES, THE ANSWER IS YES
+                else
+                    result[numberOfQbits -1 - j].components[1].add(components[i]);
+                if ((i+1) % Math.pow(2, j) == 0){
+                    isAddingZero = !isAddingZero;
+                }
+            }
+            Imaginary zeroSum = result[numberOfQbits -1 - j].components[0];
+            Imaginary oneSum = result[numberOfQbits -1 - j].components[1];
+            result[numberOfQbits -1 - j].components[0] = Imaginary.divide(zeroSum, Imaginary.sum(zeroSum, oneSum)).pow(1.0/2);
+            result[numberOfQbits -1 - j].components[1] = Imaginary.divide(oneSum, Imaginary.sum(zeroSum, oneSum)).pow(1.0/2);
+        }
+        //System.out.println("deTensorized, Result:");
+//        for (int j = 0; j < result.length; j++) {
+//            System.out.println(result[j].toString());
+//        }
+        return result;
+    }
+
+    private static Imaginary[] tensorize(Qbit[] input){
         Imaginary[][] imaginaryInput = new Imaginary[input.length][2];
         for (int i = 0; i < input.length; i++)
             imaginaryInput[i] = input[i].components;
@@ -94,7 +161,7 @@ public class State {
         return tensorizeRec(toBeTensorized);
     }
 
-    static Gate kroeneckerProductForGates(Gate[] gates){
+    private static Gate kroeneckerProductForGates(Gate[] gates){
         Queue<Imaginary[][]> matrices = new LinkedList<>();
         for (Gate gate: gates){
             matrices.offer(gate.getMatrix());
@@ -109,7 +176,7 @@ public class State {
         return resultGate;
     }
 
-    static Imaginary[][] kroneckerProduct(Imaginary a[][], Imaginary b[][])
+    private static Imaginary[][] kroneckerProduct(Imaginary a[][], Imaginary b[][])
     {
         int rowa = a.length;
         int rowb = b.length;
@@ -126,5 +193,26 @@ public class State {
                         c[i*rowb + k][colb*j + l] = Imaginary.multiply(a[i][j], b[k][l]);
 
         return c;
+    }
+
+    //This method adds the corresponding number of zeroes to the left of the
+    // binary representation of a number according to the number of qbits in the state.
+    //Eg. if we have 3 qbits, the binary representation of 1 will be "001" rather than "1"
+    private String fullBinaryString(int n){
+        StringBuilder builder = new StringBuilder();
+        for (int j = 0; j < Math.abs(Integer.toBinaryString(n).length() - getNumberOfQbits());j++)
+            builder.append('0');
+        builder.append(Integer.toBinaryString(n));
+        return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Qbit))
+            return false;
+        for (int i = 0; i < components.length; i++)
+            if (!components[i].equals(((State)obj).components[i]))
+                return false;
+        return true;
     }
 }
