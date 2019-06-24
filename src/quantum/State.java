@@ -1,6 +1,6 @@
 package quantum;
 
-import math.Imaginary;
+import math.Complex;
 
 import quantum.gates.Gate;
 import quantum.gates.ID;
@@ -8,7 +8,7 @@ import quantum.gates.ID;
 import java.util.*;
 
 public class State {
-    protected Imaginary[] components;
+    protected Complex[] components;
 
     public State(Qbit[] qbits){
         components = tensorize(qbits);
@@ -22,7 +22,7 @@ public class State {
         Qbit myQbit = measuredQbits()[n];
         float randomFloat = rnd.nextFloat();
         char result;
-        if (randomFloat < Imaginary.pow(myQbit.probabilityOf0(), 2).getRealPart())
+        if (randomFloat < Complex.pow(myQbit.probabilityOf0(), 2).getRealPart())
             result = '0';
         else
             result = '1';
@@ -32,7 +32,7 @@ public class State {
         double totalProbability = 0;
         for (int i = 0; i < components.length; i++)
             if(fullBinaryString(i).charAt(n) != result)
-                components[i] = new Imaginary(0);
+                components[i] = new Complex(0);
             else
                 totalProbability += Math.pow(components[i].getModulus(), 2);
 
@@ -47,12 +47,12 @@ public class State {
         StringBuilder builder = new StringBuilder();
         builder.append("MEASURE: ");
         for (int i = 0; i < components.length; i++){
-            if (Imaginary.pow(components[i], 2).equals(new Imaginary(0)))
+            if (Complex.pow(components[i], 2).equals(new Complex(0)))
                 continue;
             builder.append('|');
             builder.append(fullBinaryString(i));
             builder.append(">: ");
-            //builder.append(Imaginary.pow(components[i], 2).toString());
+            //builder.append(Complex.pow(components[i], 2).toString());
             builder.append(components[i].getRealPart());
             if (i != components.length-1) builder.append(" - ");
         }
@@ -62,11 +62,11 @@ public class State {
         System.out.println(builder.toString());
     }
 
-    public Imaginary getComponent(int n){
+    public Complex getComponent(int n){
         return components[n];
     }
 
-    public void setComponent(int n, Imaginary newVal){
+    public void setComponent(int n, Complex newVal){
         components[n] = newVal;
     }
 
@@ -127,10 +127,10 @@ public class State {
                     isAddingZero = !isAddingZero;
                 }
             }
-            Imaginary zeroSum = result[numberOfQbits -1 - j].components[0];
-            Imaginary oneSum = result[numberOfQbits -1 - j].components[1];
-            result[numberOfQbits -1 - j].components[0] = Imaginary.divide(zeroSum, Imaginary.sum(zeroSum, oneSum)).pow(1.0/2);
-            result[numberOfQbits -1 - j].components[1] = Imaginary.divide(oneSum, Imaginary.sum(zeroSum, oneSum)).pow(1.0/2);
+            Complex zeroSum = result[numberOfQbits -1 - j].components[0];
+            Complex oneSum = result[numberOfQbits -1 - j].components[1];
+            result[numberOfQbits -1 - j].components[0] = Complex.divide(zeroSum, Complex.sum(zeroSum, oneSum)).pow(1.0/2);
+            result[numberOfQbits -1 - j].components[1] = Complex.divide(oneSum, Complex.sum(zeroSum, oneSum)).pow(1.0/2);
         }
         //System.out.println("deTensorized, Result:");
 //        for (int j = 0; j < result.length; j++) {
@@ -139,22 +139,22 @@ public class State {
         return result;
     }
 
-    private static Imaginary[] tensorize(Qbit[] input){
-        Imaginary[][] imaginaryInput = new Imaginary[input.length][2];
+    private static Complex[] tensorize(Qbit[] input){
+        Complex[][] complexInput = new Complex[input.length][2];
         for (int i = 0; i < input.length; i++)
-            imaginaryInput[i] = input[i].components;
-        return tensorizeRec(imaginaryInput);
+            complexInput[i] = input[i].components;
+        return tensorizeRec(complexInput);
     }
 
-    private static Imaginary[] tensorizeRec(Imaginary[][] input){
+    private static Complex[] tensorizeRec(Complex[][] input){
         if (input.length == 2){
-            Imaginary[] result = new Imaginary[input[0].length * input[1].length];
+            Complex[] result = new Complex[input[0].length * input[1].length];
             for (int i = 0; i < input[0].length; i++)
                 for (int j = 0; j < input[1].length; j++)
-                    result[i * input[1].length + j] = Imaginary.multiply(input[0][i], input[1][j]);
+                    result[i * input[1].length + j] = Complex.multiply(input[0][i], input[1][j]);
             return result;
         }
-        Imaginary[][] toBeTensorized = new Imaginary[][]{
+        Complex[][] toBeTensorized = new Complex[][]{
                 input[0],
                 tensorizeRec(Arrays.copyOfRange(input, 1, input.length))
         };
@@ -162,35 +162,35 @@ public class State {
     }
 
     private static Gate kroeneckerProductForGates(Gate[] gates){
-        Queue<Imaginary[][]> matrices = new LinkedList<>();
+        Queue<Complex[][]> matrices = new LinkedList<>();
         for (Gate gate: gates){
             matrices.offer(gate.getMatrix());
         }
 
-        Imaginary[][] result = matrices.poll();
+        Complex[][] result = matrices.poll();
         while (!matrices.isEmpty()){
-            Imaginary[][] next = matrices.poll();
+            Complex[][] next = matrices.poll();
             result = kroneckerProduct(result, next);
         }
         Gate resultGate = new Gate(result);
         return resultGate;
     }
 
-    private static Imaginary[][] kroneckerProduct(Imaginary a[][], Imaginary b[][])
+    private static Complex[][] kroneckerProduct(Complex a[][], Complex b[][])
     {
         int rowa = a.length;
         int rowb = b.length;
         int cola = a[0].length;
         int colb = b[0].length;
 
-        Imaginary[][] c = new Imaginary[rowa * rowb][cola * colb];
+        Complex[][] c = new Complex[rowa * rowb][cola * colb];
 
         //Each element of matrix a is multiplied by whole matrix b and stored in matrix c
         for (int i = 0; i < rowa; i++)
             for (int j = 0; j < cola; j++)
                 for (int k = 0; k < rowb; k++)
                     for (int l = 0; l < colb; l++)
-                        c[i*rowb + k][colb*j + l] = Imaginary.multiply(a[i][j], b[k][l]);
+                        c[i*rowb + k][colb*j + l] = Complex.multiply(a[i][j], b[k][l]);
 
         return c;
     }

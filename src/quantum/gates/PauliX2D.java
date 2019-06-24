@@ -1,12 +1,12 @@
 package quantum.gates;
 
-import math.Imaginary;
+import math.Complex;
 
 public class PauliX2D extends Gate{
     public PauliX2D(){
         dimension = 2;
-        matrix = new Imaginary[][]{
-                {new Imaginary(0 ), new Imaginary(1)},
-                {new Imaginary(1 ), new Imaginary(0)}};
+        matrix = new Complex[][]{
+                {new Complex(0 ), new Complex(1)},
+                {new Complex(1 ), new Complex(0)}};
     }
 }
