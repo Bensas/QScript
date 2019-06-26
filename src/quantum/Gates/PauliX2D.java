@@ -1,4 +1,4 @@
-package quantum.gates;
+package quantum.Gates;
 
 import math.Complex;
 

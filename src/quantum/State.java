@@ -2,8 +2,8 @@ package quantum;
 
 import math.Complex;
 
-import quantum.gates.Gate;
-import quantum.gates.ID;
+import quantum.Gates.Gate;
+import quantum.Gates.ID;
 
 import java.util.*;
 
@@ -78,7 +78,7 @@ public class State {
 
     public void applyGateToQbit(int n, Gate gate){
         if (gate.getDimension() > 2)
-            throw new IllegalArgumentException("This method can only be used with single-qbit gates!");
+            throw new IllegalArgumentException("This method can only be used with single-qbit Gates!");
         //In order to apply a gate to a single Qbit, we must apply to the whole state a new gate,
         //which will be the result of a tensor product between the original gate and a bunch of Identity Gates for the
         //Qbits what the gate should not apply to.

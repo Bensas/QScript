@@ -1,9 +1,8 @@
 package quantum.Oracles;
 
-import quantum.Qbit;
 import quantum.State;
-import quantum.gates.CNOT;
-import quantum.gates.PauliX2D;
+import quantum.Gates.CNOT;
+import quantum.Gates.PauliX2D;
 
 public class NOTOracle extends Oracle{
     public void apply(State input, int firstQbit) {

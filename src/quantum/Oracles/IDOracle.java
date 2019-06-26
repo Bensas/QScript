@@ -1,9 +1,7 @@
 package quantum.Oracles;
 
-import quantum.Qbit;
 import quantum.State;
-import quantum.gates.CNOT;
-import quantum.gates.PauliX2D;
+import quantum.Gates.CNOT;
 
 public class IDOracle extends Oracle{
 

@@ -1,8 +1,7 @@
 package quantum.Oracles;
 
-import quantum.Qbit;
 import quantum.State;
-import quantum.gates.PauliX2D;
+import quantum.Gates.PauliX2D;
 
 public class Const1Oracle extends Oracle{
     @Override
